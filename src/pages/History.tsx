@@ -1,208 +1,213 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarDays, TrendingUp, TrendingDown, Filter, Download } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
+import { Calendar, TrendingUp, TrendingDown, Filter } from "lucide-react";
 
 const History = () => {
-  const monthlyHistory = [
+  const [selectedMonth, setSelectedMonth] = useState('2024-01');
+  const [filterType, setFilterType] = useState('all');
+
+  const monthlyData = [
     {
-      month: "February 2025",
-      totalIncome: 98200,
-      totalExpenses: 7100,
-      balance: 91100,
-      transactions: 15,
-      savings: 85100
+      month: '2024-01',
+      monthName: 'January 2024',
+      totalIncome: 3500,
+      totalExpenses: 1650,
+      balance: 1850,
+      transactions: [
+        { id: 1, type: 'income', amount: 3000, category: 'Salary', date: '2024-01-01', description: 'Monthly salary' },
+        { id: 2, type: 'income', amount: 500, category: 'Freelance', date: '2024-01-15', description: 'Web design project' },
+        { id: 3, type: 'expense', amount: 1200, category: 'Rent', date: '2024-01-02', description: 'Monthly rent' },
+        { id: 4, type: 'expense', amount: 300, category: 'Food', date: '2024-01-03', description: 'Groceries' },
+        { id: 5, type: 'expense', amount: 150, category: 'Transport', date: '2024-01-04', description: 'Gas and maintenance' },
+      ]
     },
     {
-      month: "January 2025",
-      totalIncome: 85600,
-      totalExpenses: 12400,
-      balance: 73200,
-      transactions: 22,
-      savings: 60800
-    },
-    {
-      month: "December 2024",
-      totalIncome: 79300,
-      totalExpenses: 15800,
-      balance: 63500,
-      transactions: 28,
-      savings: 47700
-    },
-    {
-      month: "November 2024",
-      totalIncome: 82100,
-      totalExpenses: 13200,
-      balance: 68900,
-      transactions: 19,
-      savings: 55700
-    },
-    {
-      month: "October 2024",
-      totalIncome: 76800,
-      totalExpenses: 14600,
-      balance: 62200,
-      transactions: 25,
-      savings: 47600
-    },
-    {
-      month: "September 2024",
-      totalIncome: 88400,
-      totalExpenses: 11300,
-      balance: 77100,
-      transactions: 17,
-      savings: 65800
+      month: '2023-12',
+      monthName: 'December 2023',
+      totalIncome: 2800,
+      totalExpenses: 1500,
+      balance: 1300,
+      transactions: [
+        { id: 6, type: 'income', amount: 2800, category: 'Salary', date: '2023-12-01', description: 'Monthly salary' },
+        { id: 7, type: 'expense', amount: 1200, category: 'Rent', date: '2023-12-02', description: 'Monthly rent' },
+        { id: 8, type: 'expense', amount: 200, category: 'Food', date: '2023-12-15', description: 'Groceries' },
+        { id: 9, type: 'expense', amount: 100, category: 'Entertainment', date: '2023-12-20', description: 'Movies' },
+      ]
     }
   ];
 
-  const getPerformanceBadge = (balance: number, expenses: number) => {
-    const ratio = balance / expenses;
-    if (ratio > 10) return { text: "Excellent", variant: "default" as const, color: "bg-green-500" };
-    if (ratio > 5) return { text: "Good", variant: "secondary" as const, color: "bg-blue-500" };
-    if (ratio > 3) return { text: "Fair", variant: "outline" as const, color: "bg-yellow-500" };
-    return { text: "Needs Attention", variant: "destructive" as const, color: "bg-red-500" };
-  };
+  const currentMonthData = monthlyData.find(data => data.month === selectedMonth) || monthlyData[0];
+
+  const filteredTransactions = currentMonthData.transactions.filter(transaction => {
+    if (filterType === 'all') return true;
+    return transaction.type === filterType;
+  });
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="min-h-screen flex w-full bg-slate-50">
       <Sidebar />
-      
       <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Monthly History</h1>
-              <p className="text-slate-600">Review your financial performance over time</p>
+              <h1 className="text-3xl font-bold text-slate-800">Transaction History</h1>
+              <p className="text-slate-600">Review your financial activity over time</p>
             </div>
-            <div className="flex space-x-3">
-              <Select defaultValue="all">
-                <SelectTrigger className="w-40">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Filter by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Months</SelectItem>
-                  <SelectItem value="2025">2025 Only</SelectItem>
-                  <SelectItem value="2024">2024 Only</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
-                <Download className="w-4 h-4 mr-2" />
-                Export Data
-              </Button>
+            <div className="flex items-center space-x-4">
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="p-2 border border-gray-300 rounded-md"
+              >
+                {monthlyData.map(data => (
+                  <option key={data.month} value={data.month}>{data.monthName}</option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-slate-800 mb-2">6</div>
-                <div className="text-sm text-slate-600">Months Tracked</div>
+          {/* Monthly Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  ${currentMonthData.totalIncome.toLocaleString()}
+                </div>
+                <p className="text-xs text-slate-600">{currentMonthData.monthName}</p>
               </CardContent>
             </Card>
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-green-600 mb-2">$510,400</div>
-                <div className="text-sm text-slate-600">Total Income</div>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  ${currentMonthData.totalExpenses.toLocaleString()}
+                </div>
+                <p className="text-xs text-slate-600">{currentMonthData.monthName}</p>
               </CardContent>
             </Card>
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-red-600 mb-2">$74,400</div>
-                <div className="text-sm text-slate-600">Total Expenses</div>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-purple-600 mb-2">$436,000</div>
-                <div className="text-sm text-slate-600">Total Saved</div>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Net Balance</CardTitle>
+                <Calendar className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${
+                  currentMonthData.balance >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  ${currentMonthData.balance.toLocaleString()}
+                </div>
+                <p className="text-xs text-slate-600">{currentMonthData.monthName}</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Monthly Breakdown */}
-          <div className="space-y-6">
-            {monthlyHistory.map((month, index) => {
-              const performance = getPerformanceBadge(month.balance, month.totalExpenses);
-              
-              return (
-                <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <CardHeader>
+          {/* Month Comparison */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Monthly Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {monthlyData.map((data) => (
+                  <div 
+                    key={data.month}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      selectedMonth === data.month 
+                        ? 'border-purple-500 bg-purple-50' 
+                        : 'border-slate-200 bg-slate-50 hover:border-slate-300'
+                    }`}
+                    onClick={() => setSelectedMonth(data.month)}
+                  >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-gradient-to-r from-purple-500 to-orange-500 rounded-lg">
-                          <CalendarDays className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-xl">{month.month}</CardTitle>
-                          <p className="text-sm text-slate-600">{month.transactions} transactions</p>
-                        </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-800">{data.monthName}</h3>
+                        <p className="text-sm text-slate-600">
+                          {data.transactions.length} transactions
+                        </p>
                       </div>
-                      <Badge variant={performance.variant} className={performance.color}>
-                        {performance.text}
-                      </Badge>
+                      <div className="text-right">
+                        <p className="text-sm text-slate-600">Net Balance</p>
+                        <p className={`text-lg font-bold ${
+                          data.balance >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          ${data.balance.toLocaleString()}
+                        </p>
+                      </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                          <TrendingUp className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-600">Total Income</p>
-                          <p className="text-lg font-semibold text-green-600">
-                            ${month.totalIncome.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-red-100 rounded-lg">
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Transaction Filter and List */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Transactions - {currentMonthData.monthName}</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-slate-500" />
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="p-2 border border-gray-300 rounded-md text-sm"
+                  >
+                    <option value="all">All Transactions</option>
+                    <option value="income">Income Only</option>
+                    <option value="expense">Expenses Only</option>
+                  </select>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {filteredTransactions.map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        {transaction.type === 'income' ? 
+                          <TrendingUp className="w-5 h-5 text-green-600" /> : 
                           <TrendingDown className="w-5 h-5 text-red-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-600">Total Expenses</p>
-                          <p className="text-lg font-semibold text-red-600">
-                            ${month.totalExpenses.toLocaleString()}
-                          </p>
-                        </div>
+                        }
                       </div>
-                      
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-purple-100 rounded-lg">
-                          <TrendingUp className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-600">Balance</p>
-                          <p className="text-lg font-semibold text-purple-600">
-                            ${month.balance.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <TrendingUp className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-slate-600">Savings</p>
-                          <p className="text-lg font-semibold text-blue-600">
-                            ${month.savings.toLocaleString()}
-                          </p>
-                        </div>
+                      <div>
+                        <p className="font-medium">{transaction.category}</p>
+                        <p className="text-sm text-slate-600">
+                          {transaction.date} • {transaction.description}
+                        </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    <div className={`font-semibold ${
+                      transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                    </div>
+                  </div>
+                ))}
+                
+                {filteredTransactions.length === 0 && (
+                  <div className="text-center py-8 text-slate-500">
+                    No transactions found for the selected filter.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

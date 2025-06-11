@@ -1,25 +1,42 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Home } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
+      <Card className="w-full max-w-md border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+        <CardContent className="p-8 text-center space-y-6">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-orange-500 rounded-full flex items-center justify-center">
+            <span className="text-2xl font-bold text-white">404</span>
+          </div>
+          
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-slate-800">Page Not Found</h1>
+            <p className="text-slate-600">
+              The page you're looking for doesn't exist or has been moved.
+            </p>
+          </div>
+
+          <div className="flex flex-col space-y-3">
+            <Link to="/dashboard">
+              <Button className="w-full bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white">
+                <Home className="w-4 h-4 mr-2" />
+                Go to Dashboard
+              </Button>
+            </Link>
+            
+            <Link to="/">
+              <Button variant="outline" className="w-full">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

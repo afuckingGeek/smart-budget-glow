@@ -1,171 +1,234 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Download, ShoppingBag, Car, Utensils, Home } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Sidebar from "@/components/Sidebar";
-import { Link } from "react-router-dom";
+import { Plus, TrendingDown, Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const Expenses = () => {
-  const expenseData = [
-    { date: '2nd Jan', amount: 200 },
-    { date: '3rd Jan', amount: 150 },
-    { date: '4th Jan', amount: 300 },
-    { date: '5th Jan', amount: 250 },
-    { date: '6th Jan', amount: 180 },
-    { date: '7th Jan', amount: 520 },
-    { date: '8th Jan', amount: 420 },
-    { date: '9th Jan', amount: 310 },
-    { date: '10th Jan', amount: 680 },
-    { date: '11th Jan', amount: 590 },
-    { date: '12th Jan', amount: 450 },
-    { date: '14th Jan', amount: 320 },
-    { date: '16th Feb', amount: 380 },
-    { date: '17th Feb', amount: 280 }
-  ];
+  const [expenses, setExpenses] = useState([
+    { id: 1, category: 'Rent', amount: 1200, date: '2024-01-01', description: 'Monthly rent' },
+    { id: 2, category: 'Food', amount: 300, date: '2024-01-15', description: 'Groceries' },
+    { id: 3, category: 'Transport', amount: 150, date: '2024-01-20', description: 'Gas and maintenance' },
+    { id: 4, category: 'Entertainment', amount: 100, date: '2024-01-25', description: 'Movies and dining' },
+  ]);
 
-  const allExpenses = [
-    {
-      id: 1,
-      category: "Shopping",
-      amount: 430,
-      date: "17th Feb 2025",
-      icon: <ShoppingBag className="w-5 h-5" />,
-      color: "text-pink-500"
-    },
-    {
-      id: 2,
-      category: "Travel",
-      amount: 670,
-      date: "13th Feb 2025",
-      icon: <Car className="w-5 h-5" />,
-      color: "text-blue-500"
-    },
-    {
-      id: 3,
-      category: "Food & Dining",
-      amount: 280,
-      date: "16th Feb 2025",
-      icon: <Utensils className="w-5 h-5" />,
-      color: "text-green-500"
-    },
-    {
-      id: 4,
-      category: "Electricity Bill",
-      amount: 200,
-      date: "11th Feb 2025",
-      icon: <Home className="w-5 h-5" />,
-      color: "text-yellow-500"
-    },
-    {
-      id: 5,
-      category: "Loan Repayment",
-      amount: 600,
-      date: "10th Feb 2025",
-      icon: <Home className="w-5 h-5" />,
-      color: "text-orange-500"
-    },
-    {
-      id: 6,
-      category: "Gas & Fuel",
-      amount: 150,
-      date: "9th Feb 2025",
-      icon: <Car className="w-5 h-5" />,
-      color: "text-red-500"
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    category: '',
+    amount: '',
+    date: '',
+    description: ''
+  });
+
+  const categories = ['Rent', 'Food', 'Transport', 'Entertainment', 'Healthcare', 'Shopping', 'Utilities', 'Other'];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.category || !formData.amount || !formData.date) {
+      toast.error("Please fill in all required fields");
+      return;
     }
-  ];
+
+    const newExpense = {
+      id: expenses.length + 1,
+      category: formData.category,
+      amount: parseFloat(formData.amount),
+      date: formData.date,
+      description: formData.description
+    };
+
+    setExpenses([...expenses, newExpense]);
+    setFormData({ category: '', amount: '', date: '', description: '' });
+    setShowAddForm(false);
+    toast.success("Expense added successfully!");
+  };
+
+  const handleDelete = (id: number) => {
+    setExpenses(expenses.filter(expense => expense.id !== id));
+    toast.success("Expense deleted successfully!");
+  };
+
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  const expensesByCategory = categories.map(category => {
+    const categoryExpenses = expenses.filter(expense => expense.category === category);
+    const total = categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    return { category, total, count: categoryExpenses.length };
+  }).filter(item => item.total > 0);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="min-h-screen flex w-full bg-slate-50">
       <Sidebar />
-      
       <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Expense Overview</h1>
-              <p className="text-slate-600">Track your spending habits over time and gain insights into where your money goes.</p>
+              <h1 className="text-3xl font-bold text-slate-800">Expense Tracking</h1>
+              <p className="text-slate-600">Monitor and categorize your spending</p>
             </div>
-            <div className="flex space-x-3">
-              <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-              <Link to="/add-transaction">
-                <Button className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600">
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  Add Expense
-                </Button>
-              </Link>
-            </div>
+            <Button 
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Expense
+            </Button>
           </div>
 
-          {/* Expense Chart */}
-          <Card className="border-0 shadow-lg mb-8">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingDown className="w-5 h-5 mr-2 text-red-500" />
+                  Total Monthly Expenses
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-red-600">${totalExpenses.toLocaleString()}</div>
+                <p className="text-slate-600 mt-2">From {expenses.length} transactions</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Top Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {expensesByCategory.length > 0 && (
+                  <>
+                    <div className="text-2xl font-bold text-slate-800">
+                      {expensesByCategory.sort((a, b) => b.total - a.total)[0].category}
+                    </div>
+                    <p className="text-slate-600 mt-2">
+                      ${expensesByCategory.sort((a, b) => b.total - a.total)[0].total} spent
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Add Expense Form */}
+          {showAddForm && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Add New Expense</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <select
+                        id="category"
+                        value={formData.category}
+                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map(category => (
+                          <option key={category} value={category}>{category}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="amount">Amount ($)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        placeholder="0.00"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="date">Date</Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Description (Optional)</Label>
+                      <Input
+                        id="description"
+                        type="text"
+                        placeholder="Brief description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button type="submit">Add Expense</Button>
+                    <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Category Summary */}
+          <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-xl font-bold">Expense Overview</CardTitle>
-              <p className="text-slate-600">Track your spending habits over time and gain insights into where your money goes.</p>
+              <CardTitle>Expenses by Category</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={expenseData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip 
-                      formatter={(value) => [`$${value}`, 'Amount']}
-                      labelFormatter={(label) => `Date: ${label}`}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="amount" 
-                      stroke="url(#expenseGradient)" 
-                      strokeWidth={3}
-                      dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6, fill: '#f97316' }}
-                    />
-                    <defs>
-                      <linearGradient id="expenseGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#8b5cf6" />
-                        <stop offset="100%" stopColor="#f97316" />
-                      </linearGradient>
-                    </defs>
-                  </LineChart>
-                </ResponsiveContainer>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {expensesByCategory.map((item) => (
+                  <div key={item.category} className="p-4 bg-slate-50 rounded-lg">
+                    <h3 className="font-medium text-slate-800">{item.category}</h3>
+                    <p className="text-2xl font-bold text-red-600">${item.total}</p>
+                    <p className="text-sm text-slate-600">{item.count} transactions</p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* All Expenses */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-xl font-bold">All Expenses</CardTitle>
-                <p className="text-slate-600">Detailed breakdown of your spending</p>
-              </div>
-              <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700">
-                Download Report
-              </Button>
+          {/* Expense List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Expenses</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {allExpenses.map((expense) => (
-                  <div key={expense.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                {expenses.map((expense) => (
+                  <div key={expense.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                     <div className="flex items-center space-x-4">
-                      <div className={`p-3 rounded-lg bg-slate-100 ${expense.color}`}>
-                        {expense.icon}
+                      <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                        <TrendingDown className="w-5 h-5 text-red-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{expense.category}</p>
-                        <p className="text-sm text-slate-600">{expense.date}</p>
+                        <p className="font-medium">{expense.category}</p>
+                        <p className="text-sm text-slate-600">
+                          {expense.date} • {expense.description}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-red-600">
-                        -${expense.amount.toLocaleString()}
-                      </p>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <p className="font-semibold text-red-600">${expense.amount}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(expense.id)}>
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}

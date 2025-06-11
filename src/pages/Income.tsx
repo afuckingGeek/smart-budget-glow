@@ -1,150 +1,183 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Download, TrendingUp, DollarSign, Briefcase, PiggyBank } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Sidebar from "@/components/Sidebar";
-import { Link } from "react-router-dom";
+import { Plus, TrendingUp, Edit, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const Income = () => {
-  const incomeData = [
-    { date: '1st Jan', amount: 11200 },
-    { date: '4th Jan', amount: 9500 },
-    { date: '6th Jan', amount: 9200 },
-    { date: '7th Jan', amount: 13500 },
-    { date: '8th Jan', amount: 1800 },
-    { date: '9th Jan', amount: 8200 },
-    { date: '10th Jan', amount: 10800 },
-    { date: '11th Jan', amount: 12100 },
-    { date: '13th Jan', amount: 10500 },
-    { date: '12th Feb', amount: 12800 }
-  ];
+  const [incomes, setIncomes] = useState([
+    { id: 1, source: 'Salary', amount: 3000, date: '2024-01-01', recurring: true },
+    { id: 2, source: 'Freelance', amount: 500, date: '2024-01-15', recurring: false },
+    { id: 3, source: 'Investment', amount: 200, date: '2024-01-20', recurring: false },
+  ]);
 
-  const incomeSources = [
-    {
-      id: 1,
-      source: "Salary",
-      amount: 12000,
-      date: "12th Feb 2025",
-      icon: <Briefcase className="w-5 h-5" />,
-      color: "text-green-500",
-      growth: "+5.2%"
-    },
-    {
-      id: 2,
-      source: "Interest from Savings",
-      amount: 8600,
-      date: "13th Jan 2025",
-      icon: <PiggyBank className="w-5 h-5" />,
-      color: "text-blue-500",
-      growth: "+12.4%"
-    },
-    {
-      id: 3,
-      source: "E-commerce Sales",
-      amount: 11900,
-      date: "10th Jan 2025",
-      icon: <DollarSign className="w-5 h-5" />,
-      color: "text-purple-500",
-      growth: "+8.7%"
-    },
-    {
-      id: 4,
-      source: "Graphic Design",
-      amount: 2400,
-      date: "10th Jan 2025",
-      icon: <TrendingUp className="w-5 h-5" />,
-      color: "text-orange-500",
-      growth: "+15.3%"
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    source: '',
+    amount: '',
+    date: '',
+    recurring: false
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.source || !formData.amount || !formData.date) {
+      toast.error("Please fill in all fields");
+      return;
     }
-  ];
+
+    const newIncome = {
+      id: incomes.length + 1,
+      source: formData.source,
+      amount: parseFloat(formData.amount),
+      date: formData.date,
+      recurring: formData.recurring
+    };
+
+    setIncomes([...incomes, newIncome]);
+    setFormData({ source: '', amount: '', date: '', recurring: false });
+    setShowAddForm(false);
+    toast.success("Income added successfully!");
+  };
+
+  const handleDelete = (id: number) => {
+    setIncomes(incomes.filter(income => income.id !== id));
+    toast.success("Income deleted successfully!");
+  };
+
+  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="min-h-screen flex w-full bg-slate-50">
       <Sidebar />
-      
       <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Income Overview</h1>
-              <p className="text-slate-600">Track your earnings over time and analyze your income trends.</p>
+              <h1 className="text-3xl font-bold text-slate-800">Income Tracking</h1>
+              <p className="text-slate-600">Manage and track all your income sources</p>
             </div>
-            <div className="flex space-x-3">
-              <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-              <Link to="/add-transaction">
-                <Button className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600">
-                  <PlusCircle className="w-4 h-4 mr-2" />
-                  Add Income
-                </Button>
-              </Link>
-            </div>
+            <Button 
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Income
+            </Button>
           </div>
 
-          {/* Income Chart */}
-          <Card className="border-0 shadow-lg mb-8">
+          {/* Summary Card */}
+          <Card className="mb-8">
             <CardHeader>
-              <CardTitle className="text-xl font-bold">Income Overview</CardTitle>
-              <p className="text-slate-600">Track your earnings over time and gain insights into where your money goes.</p>
+              <CardTitle className="flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
+                Total Monthly Income
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={incomeData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-                    <Bar 
-                      dataKey="amount" 
-                      fill="url(#incomeGradient)" 
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <defs>
-                      <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" />
-                        <stop offset="100%" stopColor="#f97316" />
-                      </linearGradient>
-                    </defs>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <div className="text-3xl font-bold text-green-600">${totalIncome.toLocaleString()}</div>
+              <p className="text-slate-600 mt-2">From {incomes.length} income sources</p>
             </CardContent>
           </Card>
 
-          {/* Income Sources */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-xl font-bold">Income Sources</CardTitle>
-                <p className="text-slate-600">Breakdown of your income by source</p>
-              </div>
-              <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700">
-                Download Report
-              </Button>
+          {/* Add Income Form */}
+          {showAddForm && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Add New Income</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="source">Income Source</Label>
+                      <Input
+                        id="source"
+                        type="text"
+                        placeholder="e.g., Salary, Freelance"
+                        value={formData.source}
+                        onChange={(e) => setFormData({...formData, source: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="amount">Amount ($)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        placeholder="0.00"
+                        value={formData.amount}
+                        onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="date">Date</Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="recurring"
+                        checked={formData.recurring}
+                        onChange={(e) => setFormData({...formData, recurring: e.target.checked})}
+                        className="rounded"
+                      />
+                      <Label htmlFor="recurring">Recurring Income</Label>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button type="submit">Add Income</Button>
+                    <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Income List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Income Sources</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {incomeSources.map((source) => (
-                  <div key={source.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+              <div className="space-y-4">
+                {incomes.map((income) => (
+                  <div key={income.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
                     <div className="flex items-center space-x-4">
-                      <div className={`p-3 rounded-lg bg-slate-100 ${source.color}`}>
-                        {source.icon}
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{source.source}</p>
-                        <p className="text-sm text-slate-600">{source.date}</p>
+                        <p className="font-medium">{income.source}</p>
+                        <p className="text-sm text-slate-600">
+                          {income.date} {income.recurring && '• Recurring'}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-green-600">
-                        +${source.amount.toLocaleString()}
-                      </p>
-                      <p className="text-sm text-green-500">{source.growth}</p>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600">${income.amount}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(income.id)}>
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
